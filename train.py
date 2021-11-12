@@ -37,7 +37,7 @@ DECAY_STEP = 200000
 DECAY_RATE = 0.7
 
 MODEL = importlib.import_module('pointnet') # import network module
-MODEL_FILE = os.path.join(ROOT_DIR, 'models', FLAGS.model+'.py')
+MODEL_FILE = os.path.join(ROOT_DIR, 'models', 'pointnet'+'.py')
 LOG_DIR = 'log'
 
 if not os.path.exists(LOG_DIR): os.mkdir(LOG_DIR)
