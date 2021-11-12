@@ -2,6 +2,11 @@ import tensorflow as tf
 import numpy as np
 import math
 
+def placeholder_inputs(batch_size, num_point):
+    pointclouds_pl = tf.placeholder(tf.float32, shape=(batch_size, num_point, 3))
+    labels_pl = tf.placeholder(tf.int32, shape=(batch_size))
+    return pointclouds_pl, labels_pl
+    
 
 def get_model(cloud, is_training, bn_decay=None):
     #our output will be of the shape Bx40
