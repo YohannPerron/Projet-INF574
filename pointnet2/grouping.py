@@ -1,11 +1,4 @@
-from hashlib import new
 import tensorflow as tf
-from tensorflow.python.framework import ops
-import sys
-import os
-
-from tensorflow.python.ops.sort_ops import sort
-
 
 def grouping(radius, nsample,new_xyz, xyz, points):
     '''
