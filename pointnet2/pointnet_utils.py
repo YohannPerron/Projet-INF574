@@ -21,7 +21,7 @@ def sample_and_group(npoint, radius, nsample, xyz, points):
     new_points, idx, grouped_xyz = grouping.grouping(radius, nsample,new_xyz, xyz, points)
     return new_xyz, new_points, idx, grouped_xyz
 
-def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2):
+def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2 = None):
     ''' PointNet Set Abstraction (SA) Module
         Input:
             xyz: (batch_size, ndataset, 3) TF tensor
@@ -36,10 +36,7 @@ def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2):
             new_points: (batch_size, npoint, mlp[-1] or mlp2[-1]) TF tensor
             idx: (batch_size, npoint, nsample) int32 -- indices for local regions
     '''
-    for i in range(len(radius_list)):
-            radius = radius_list[i]
-            nsample = nsample_list[i]
-            new_xyz, new_points, idx, grouped_xyz = sample_and_group(npoint, radius, nsample, xyz, points)
+    new_xyz, new_points, idx, grouped_xyz = sample_and_group(npoint, radius, nsample, xyz, points)
 
     #First Dense NN on all points
     for num_out_channel in NN:
@@ -48,9 +45,10 @@ def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2):
     #max pooling
     new_points = tf.reduce_max(new_points, axis=2)      #shape: batch_size, npoint, mlp[-1]
 
-    for num_out_channel in NN2:
-        new_points = tf.keras.layers.Conv2D(num_out_channel, (1,1), strides=(1, 1), padding='valid')(new_points)
-                                                        #shape: batch_size, npoint, num_out_channel
+    if NN2 !=None :
+        for num_out_channel in NN2:
+            new_points = tf.keras.layers.Conv2D(num_out_channel, (1,1), strides=(1, 1), padding='valid')(new_points)
+                                                            #shape: batch_size, npoint, num_out_channel
     
     return new_xyz, new_points, idx
 
