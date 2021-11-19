@@ -6,6 +6,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from matplotlib import pyplot as plt
+from pointnet2_class import get_model
 
 tf.random.set_seed(1234)
 
@@ -207,7 +208,8 @@ x = layers.Dropout(0.3)(x)
 
 outputs = layers.Dense(NUM_CLASSES, activation="softmax")(x)
 
-model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
+#model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
+model = get_model()
 model.summary()
 
 """

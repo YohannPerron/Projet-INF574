@@ -5,8 +5,9 @@ import math
 import sys
 import os
 
-def get_model(point_cloud):
+def get_model():
     """ Classification PointNet, input is BxNx3, output Bx40 """
+    point_cloud = keras.Input(shape=(NUM_POINTS, 3))
     batch_size, num_point ,_ = point_cloud.shape
 
     xyz_0 = point_cloud
@@ -25,10 +26,11 @@ def get_model(point_cloud):
     net= tf.keras.layers.Dense(256)(net)
     net = tf.keras.layers.ReLU()(net)
     net = tf.keras.layers.Dropout(0.5)(net)
-    net= tf.keras.layers.Dense(40)(net)
+    #change back to 40
+    net= tf.keras.layers.Dense(10)(net)
 
 
-    return net
+    return keras.Model(inputs=inputs, outputs=net, name="pointnet2")
 
 
 def get_loss(pred, label, end_points):
