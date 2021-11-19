@@ -10,16 +10,15 @@ def fps(xyz, npoint):
     '''
     batch_size,ndataset,__ = xyz.shape
 
-    new_indices = tf.Variable(tf.zeros([batch_size, npoint,2], dtype=tf.int32))
-    for ex in range(batch_size):
-        new_indices[ex, : , 0].assign(tf.fill([npoint], ex))
+    new_indices = tf.zeros([batch_size, 1], dtype=tf.int32)
+
     dist = tf.zeros([batch_size,ndataset])
     for i in range(1,npoint):
-        delta = xyz-tf.reshape(tf.gather_nd(xyz, new_indices[:,i-1]),[batch_size,1,3])
+        delta = xyz-tf.reshape(tf.gather(xyz, new_indices[:,i-1], batch_dims=1),[batch_size,1,3])
         dist_to_last = tf.norm(delta, axis = -1) # shape = (batch_size, ndataset)
         dist = tf.maximum(dist, dist_to_last)
-        new_indices[:,i,1].assign(tf.argmax(dist, axis = -1, output_type=tf.int32)) # shape = (batch_size)
-    return tf.gather_nd(xyz, new_indices)
+        new_indices = tf.concat([new_indices,tf.argmax(dist, axis = -1, output_type=tf.int32)[:, tf.newaxis]], axis = -1) # shape = (batch_size)
+    return tf.gather(xyz, new_indices, batch_dims=1)
 
 if __name__ == "__main__":
     tf.compat.v1.enable_eager_execution()

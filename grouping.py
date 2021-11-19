@@ -17,7 +17,7 @@ def grouping(radius, nsample,new_xyz, xyz, points):
     batch_size,ndataset,__ = xyz.shape
     npoint = new_xyz.shape[1]
 
-    idx = tf.Variable(tf.zeros([batch_size, npoint, nsample], dtype=tf.int32))
+    idx = tf.zeros([batch_size, 0, nsample], dtype=tf.int32)
 
     for centre in range(npoint):
         delta = xyz-tf.reshape(new_xyz[:,centre,:],[batch_size, 1, 3])  #shape: batch_size, ndataset, 3
@@ -30,7 +30,7 @@ def grouping(radius, nsample,new_xyz, xyz, points):
         if ndataset<nsample:
             z = tf.broadcast_to(centroid_indices[:, tf.newaxis],[batch_size, nsample-ndataset])
             radius_indices = tf.concat([radius_indices,z], axis=-1)
-        idx[:,centre,:].assign(radius_indices[:,:nsample])
+        idx = tf.concat([idx,radius_indices[:,tf.newaxis,:nsample]], axis=1)
     
     grouped_xyz = tf.gather(xyz, idx, batch_dims=1)
     if points == None:
