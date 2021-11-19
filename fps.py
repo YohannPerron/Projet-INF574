@@ -30,3 +30,21 @@ if __name__ == "__main__":
     new_xyz = fps(xyz, 2)
     tf.print(new_xyz)
 
+class fpsLayer(tf.keras.layers.Layer):
+    def __init__(self, batch_size, ndataset, npoint):
+        super(fpsLayer, self).__init__()
+        self.batch_size = batch_size
+        self.ndataset = ndataset
+        self.npoint = npoint
+        self.new_indices = tf.Variable(
+            initial_value=tf.zeros([batch_size, npoint], dtype=tf.int32), trainable=False
+        )
+
+    def call(self, xyz):
+        dist = tf.zeros([self.batch_size,self.ndataset])
+        for i in range(1,self.npoint):
+            delta = xyz-tf.reshape(tf.gather(xyz, self.new_indices[:,i-1], batch_dims=1),[self.batch_size,1,3])
+            dist_to_last = tf.norm(delta, axis = -1) # shape = (batch_size, ndataset)
+            dist = tf.maximum(dist, dist_to_last)
+            self.new_indices[:,i].assign(tf.argmax(dist, axis = -1, output_type=tf.int32)) # shape = (batch_size)
+        return tf.gather(xyz, self.new_indices, batch_dims=1)

@@ -17,8 +17,9 @@ def sample_and_group(npoint, radius, nsample, xyz, points):
         grouped_xyz: (batch_size, npoint, nsample, 3) TF tensor, normalized point XYZs
             (subtracted by seed point XYZ) in local regions
     '''
-    new_xyz = fps.fps(xyz, npoint)
-    new_points, idx, grouped_xyz = grouping.grouping(radius, nsample,new_xyz, xyz, points)
+    batch_size,ndataset,__ = xyz.shape
+    new_xyz = fps.fpsLayer(batch_size, ndataset, npoint)(xyz)
+    new_points, idx, grouped_xyz = grouping.groupingLayer(batch_size, ndataset, npoint, radius, nsample)(new_xyz, xyz, points)
     return new_xyz, new_points, idx, grouped_xyz
 
 def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2 = None):
