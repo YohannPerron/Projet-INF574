@@ -1,32 +1,3 @@
-"""
-Title: Point cloud segmentation with PointNet
-Author: [Soumik Rakshit](https://github.com/soumik12345), [Sayak Paul](https://github.com/sayakpaul)
-Date created: 2020/10/23
-Last modified: 2020/10/24
-Description: Implementation of a PointNet-based model for segmenting point clouds.
-"""
-"""
-## Introduction
-A "point cloud" is an important type of data structure for storing geometric shape data.
-Due to its irregular format, it's often transformed into
-regular 3D voxel grids or collections of images before being used in deep learning applications,
-a step which makes the data unnecessarily large.
-The PointNet family of models solves this problem by directly consuming point clouds, respecting
-the permutation-invariance property of the point data. The PointNet family of
-models provides a simple, unified architecture
-for applications ranging from **object classification**, **part segmentation**, to
-**scene semantic parsing**.
-In this example, we demonstrate the implementation of the PointNet architecture
-for shape segmentation.
-### References
-- [PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation](https://arxiv.org/abs/1612.00593)
-- [Point cloud classification with PointNet](https://keras.io/examples/vision/pointnet/)
-- [Spatial Transformer Networks](https://arxiv.org/abs/1506.02025)
-"""
-
-"""
-## Imports
-"""
 
 import os
 import json
@@ -41,17 +12,6 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 import matplotlib.pyplot as plt
-
-"""
-## Downloading Dataset
-The [ShapeNet dataset](https://shapenet.org/) is an ongoing effort to establish a richly-annotated,
-large-scale dataset of 3D shapes. **ShapeNetCore** is a subset of the full ShapeNet
-dataset with clean single 3D models and manually verified category and alignment
-annotations. It covers 55 common object categories, with about 51,300 unique 3D models.
-For this example, we use one of the 12 object categories of
-[PASCAL 3D+](http://cvgl.stanford.edu/projects/pascal3d.html),
-included as part of the ShapenetCore dataset.
-"""
 
 dataset_url = "https://git.io/JiY4i"
 
@@ -98,12 +58,12 @@ INITIAL_LR = 1e-3
 
 """
 ## Structuring the dataset
-We generate the following in-memory data structures from the Airplane point clouds and
-their labels:
+
 - `point_clouds` is a list of `np.array` objects that represent the point cloud data in
-the form of x, y and z coordinates. Axis 0 represents the number of points in the
-point cloud, while axis 1 represents the coordinates. `all_labels` is the list
-that represents the label of each coordinate as a string (needed mainly for
+the form of x, y and z coordinates. 
+Axis 0 represents the number of points in the
+point cloud, while axis 1 represents the coordinates. 
+`all_labels` is the list that represents the label of each coordinate as a string (needed mainly for
 visualization purposes).
 - `test_point_clouds` is in the same format as `point_clouds`, but doesn't have
 corresponding the labels of the point clouds.
@@ -289,51 +249,7 @@ val_dataset = generate_dataset(val_point_clouds, val_label_cloud, is_training=Fa
 print("Train Dataset:", train_dataset)
 print("Validation Dataset:", val_dataset)
 
-"""
-## PointNet model
-The figure below depicts the internals of the PointNet model family:
-![](https://i.imgur.com/qFLNw5L.png)
-Given that PointNet is meant to consume an ***unordered set*** of coordinates as its input data,
-its architecture needs to match the following characteristic properties
-of point cloud data:
-### Permutation invariance
-Given the unstructured nature of point cloud data, a scan made up of `n` points has `n!`
-permutations. The subsequent data processing must be invariant to the different
-representations. In order to make PointNet invariant to input permutations, we use a
-symmetric function (such as max-pooling) once the `n` input points are mapped to
-higher-dimensional space. The result is a **global feature vector** that aims to capture
-an aggregate signature of the `n` input points. The global feature vector is used alongside
-local point features for segmentation.
-![](https://i.imgur.com/0mrvvjb.png)
-### Transformation invariance
-Segmentation outputs should be unchanged if the object undergoes certain transformations,
-such as translation or scaling. For a given input point cloud, we apply an appropriate
-rigid or affine transformation to achieve pose normalization. Because each of the `n` input
-points are represented as a vector and are mapped to the embedding spaces independently,
-applying a geometric transformation simply amounts to matrix multiplying each point with
-a transformation matrix. This is motivated by the concept of
-[Spatial Transformer Networks](https://arxiv.org/abs/1506.02025).
-The operations comprising the T-Net are motivated by the higher-level architecture of
-PointNet. MLPs (or fully-connected layers) are used to map the input points independently
-and identically to a higher-dimensional space; max-pooling is used to encode a global
-feature vector whose dimensionality is then reduced with fully-connected layers. The
-input-dependent features at the final fully-connected layer are then combined with
-globally trainable weights and biases, resulting in a 3-by-3 transformation matrix.
-![](https://i.imgur.com/aEj3GYi.png)
-### Point interactions
-The interaction between neighboring points often carries useful information (i.e., a
-single point should not be treated in isolation). Whereas classification need only make
-use of global features, segmentation must be able to leverage local point features along
-with global point features.
-**Note**: The figures presented in this section have been taken from the
-[original paper](https://arxiv.org/abs/1612.00593).
-"""
 
-"""
-Now that we know the pieces that compose the PointNet model, we can implement the model.
-We start by implementing the basic blocks i.e., the convolutional block and the multi-layer
-perceptron block.
-"""
 
 
 def conv_block(x: tf.Tensor, filters: int, name: str) -> tf.Tensor:
@@ -346,14 +262,6 @@ def mlp_block(x: tf.Tensor, filters: int, name: str) -> tf.Tensor:
     x = layers.Dense(filters, name=f"{name}_dense")(x)
     x = layers.BatchNormalization(momentum=0.0, name=f"{name}_batch_norm")(x)
     return layers.Activation("relu", name=f"{name}_relu")(x)
-
-
-"""
-We implement a regularizer (taken from
-[this example](https://keras.io/examples/vision/pointnet/#build-a-model))
-to enforce orthogonality in the feature space. This is needed to ensure
-that the magnitudes of the transformed features do not vary too much.
-"""
 
 
 class OrthogonalRegularizer(keras.regularizers.Regularizer):
@@ -376,17 +284,8 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
         return config
 
 
-"""
-The next piece is the transformation network which we explained earlier.
-"""
-
 
 def transformation_net(inputs: tf.Tensor, num_features: int, name: str) -> tf.Tensor:
-    """
-    Reference: https://keras.io/examples/vision/pointnet/#build-a-model.
-    The `filters` values come from the original paper:
-    https://arxiv.org/abs/1612.00593.
-    """
     x = conv_block(inputs, filters=64, name=f"{name}_1")
     x = conv_block(x, filters=128, name=f"{name}_2")
     x = conv_block(x, filters=1024, name=f"{name}_3")
@@ -568,10 +467,3 @@ visualize_single_point_cloud(validation_batch[0], validation_batch[1], idx)
 
 # Plotting with predicted labels.
 visualize_single_point_cloud(validation_batch[0], val_predictions, idx)
-
-"""
-## Final notes
-If you are interested in learning more about this topic, you may find
-[this repository](https://github.com/soumik12345/point-cloud-segmentation)
-useful.
-"""
