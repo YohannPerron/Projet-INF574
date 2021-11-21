@@ -53,10 +53,10 @@ def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2 = None):
             idx: (batch_size, npoint, nsample) int32 -- indices for local regions
     '''
     # new_xyz, new_points, idx, grouped_xyz = sample_and_group(npoint, radius, nsample, xyz, points)
-
+    new_points = xyz
     #First Dense NN on all points
     for num_out_channel in NN:
-        new_points = tf.keras.layers.Conv2D(num_out_channel, (1,1), strides=(1, 1), padding='valid')(points)
+        new_points = tf.keras.layers.Conv2D(num_out_channel, (1,1), strides=(1, 1), padding='valid')(new_points)
                                                         #shape: batch_size, npoint, nsample, num_out_channel
     #max pooling
     new_points = tf.reduce_max(new_points, axis=2)      #shape: batch_size, npoint, mlp[-1]
