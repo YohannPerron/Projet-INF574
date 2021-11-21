@@ -56,7 +56,7 @@ def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2 = None):
 
     #First Dense NN on all points
     for num_out_channel in NN:
-        new_points = tf.keras.layers.Conv2D(num_out_channel, (1,1), strides=(1, 1), padding='valid')(new_points)
+        new_points = tf.keras.layers.Conv2D(num_out_channel, (1,1), strides=(1, 1), padding='valid')(points)
                                                         #shape: batch_size, npoint, nsample, num_out_channel
     #max pooling
     new_points = tf.reduce_max(new_points, axis=2)      #shape: batch_size, npoint, mlp[-1]
