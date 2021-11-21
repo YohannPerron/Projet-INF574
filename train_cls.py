@@ -86,7 +86,7 @@ BATCH_SIZE = 32
 
 # model = get_model(NUM_POINTS)
 model = model.CLS_MSG_Model(BATCH_SIZE,NUM_CLASSES)
-model.summary()
+# model.summary()
 
 """
 Parse data in tf.data.Dataset()
