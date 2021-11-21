@@ -82,7 +82,7 @@ P.S: change the number of classes to 40 for modelNet40
 
 NUM_POINTS = 2048
 NUM_CLASSES = 10
-BATCH_SIZE = 32
+BATCH_SIZE = 1
 
 # model = get_model(NUM_POINTS)
 model = model.CLS_MSG_Model(BATCH_SIZE,NUM_CLASSES)
