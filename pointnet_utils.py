@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from tensorflow.keras.layers import MaxPool1D, Layer, BatchNormalization
 
-from .cpp_modules import (
+from pnet2_layers.cpp_modules import (
 	farthest_point_sample,
 	gather_point,
 	query_ball_point,
