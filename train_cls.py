@@ -3,10 +3,10 @@ import glob
 import trimesh
 import numpy as np
 from matplotlib import pyplot as plt
+from pointnet2_class import get_model
+import models.cls_msg_model as modelgit
 import tensorflow as tf
 from tensorflow import keras
-from pointnet2_class import get_model
-import models.cls_msg_model as model
 
 # from tensorflow.python.framework.ops import disable_eager_execution
 # disable_eager_execution()
@@ -84,8 +84,7 @@ NUM_POINTS = 2048
 NUM_CLASSES = 10
 BATCH_SIZE = 1
 
-# model = get_model(NUM_POINTS)
-model = model.CLS_MSG_Model(BATCH_SIZE,NUM_CLASSES)
+model = get_model(NUM_POINTS)
 # model.summary()
 
 """
