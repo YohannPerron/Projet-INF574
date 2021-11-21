@@ -128,7 +128,7 @@ using `.compile()` and `.fit()`.
 """
 print("compiling model")
 model.compile(
-    loss="sparse_categorical_crossentropy",
+    loss=keras.losses.SparseCategoricalCrossentropy(),
     optimizer=keras.optimizers.Adam(learning_rate=0.001),
     metrics=["sparse_categorical_accuracy"],
 )
