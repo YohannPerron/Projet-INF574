@@ -1,5 +1,4 @@
 import tensorflow as tf
-from tensorflow.keras.layers import MaxPool1D, Layer, BatchNormalization
 
 from pnet2_layers.cpp_modules import (
 	farthest_point_sample,
@@ -38,6 +37,8 @@ from pnet2_layers.cpp_modules import (
 #     return new_xyz, new_points, idx, grouped_xyz
 
 def sample_and_group(npoint, radius, nsample, xyz, points, knn=False, use_xyz=True):
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-1")
+    farthest_point_sample(npoint, xyz)
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!0")
     new_xyz = gather_point(xyz, farthest_point_sample(npoint, xyz)) # (batch_size, npoint, 3)
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")

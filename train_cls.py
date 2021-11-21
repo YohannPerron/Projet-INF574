@@ -2,10 +2,9 @@ import os
 import glob
 import trimesh
 import numpy as np
+from matplotlib import pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers
-from matplotlib import pyplot as plt
 from pointnet2_class import get_model
 
 # from tensorflow.python.framework.ops import disable_eager_execution
