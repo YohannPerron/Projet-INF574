@@ -52,7 +52,7 @@ def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2 = None):
             new_points: (batch_size, npoint, mlp[-1] or mlp2[-1]) TF tensor
             idx: (batch_size, npoint, nsample) int32 -- indices for local regions
     '''
-    new_xyz, new_points, idx, grouped_xyz = sample_and_group(npoint, radius, nsample, xyz, points)
+    # new_xyz, new_points, idx, grouped_xyz = sample_and_group(npoint, radius, nsample, xyz, points)
 
     #First Dense NN on all points
     for num_out_channel in NN:
