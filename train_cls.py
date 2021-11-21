@@ -8,11 +8,9 @@ from tensorflow.keras import layers
 from matplotlib import pyplot as plt
 from pointnet2_class import get_model
 
-from tensorflow.python.framework.ops import disable_eager_execution
-disable_eager_execution()
+# from tensorflow.python.framework.ops import disable_eager_execution
+# disable_eager_execution()
 
-import sys
-sys.setrecursionlimit(4000)
 
 tf.random.set_seed(1234)
 
@@ -86,7 +84,7 @@ NUM_POINTS = 2048
 NUM_CLASSES = 10
 BATCH_SIZE = 32
 
-model = get_model(BATCH_SIZE,NUM_POINTS)
+model = get_model(NUM_POINTS)
 model.summary()
 
 """
