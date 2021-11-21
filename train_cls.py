@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
 from pointnet2_class import get_model
+import models.cls_msg_model as model
 
 # from tensorflow.python.framework.ops import disable_eager_execution
 # disable_eager_execution()
@@ -83,7 +84,8 @@ NUM_POINTS = 2048
 NUM_CLASSES = 10
 BATCH_SIZE = 32
 
-model = get_model(NUM_POINTS)
+# model = get_model(NUM_POINTS)
+model = model.CLS_MSG_Model(BATCH_SIZE,NUM_CLASSES)
 model.summary()
 
 """
