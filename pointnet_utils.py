@@ -1,14 +1,14 @@
 import tensorflow as tf
-
-from pnet2_layers.cpp_modules import (
-	farthest_point_sample,
-	gather_point,
-	query_ball_point,
-	group_point,
-	knn_point,
-	three_nn,
-	three_interpolate
-)
+from pnet2_layers.utils import sample_and_group
+# from pnet2_layers.cpp_modules import (
+# 	farthest_point_sample,
+# 	gather_point,
+# 	query_ball_point,
+# 	group_point,
+# 	knn_point,
+# 	three_nn,
+# 	three_interpolate
+# )
 
 # def sample_and_group(npoint, radius, nsample, xyz, points):
 #     '''
@@ -36,31 +36,6 @@ from pnet2_layers.cpp_modules import (
 #         new_points = grouped_xyz
 #     return new_xyz, new_points, idx, grouped_xyz
 
-def sample_and_group(npoint, radius, nsample, xyz, points, knn=False, use_xyz=True):
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-1")
-    farthest_point_sample(npoint, xyz)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!0")
-    new_xyz = gather_point(xyz, farthest_point_sample(npoint, xyz)) # (batch_size, npoint, 3)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
-    if knn:
-        _,idx = knn_point(nsample, xyz, new_xyz)
-    else:
-        idx, pts_cnt = query_ball_point(radius, nsample, xyz, new_xyz)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!2")
-    grouped_xyz = group_point(xyz, idx) # (batch_size, npoint, nsample, 3)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!3")
-    grouped_xyz -= tf.tile(tf.expand_dims(new_xyz, 2), [1,1,nsample,1]) # translation normalization
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!4")
-    if points is not None:
-        grouped_points = group_point(points, idx) # (batch_size, npoint, nsample, channel)
-        if use_xyz:
-            new_points = tf.concat([grouped_xyz, grouped_points], axis=-1) # (batch_size, npoint, nample, 3+channel)
-        else:
-            new_points = grouped_points
-    else:
-        new_points = grouped_xyz
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!5")
-    return new_xyz, new_points, idx, grouped_xyz
 
 def pointnet_downsample(xyz, points, npoint, radius, nsample, NN, NN2 = None):
     ''' PointNet Set Abstraction (SA) Module
