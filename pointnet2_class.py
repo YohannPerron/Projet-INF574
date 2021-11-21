@@ -14,13 +14,9 @@ def get_model(NUM_POINTS):
     points_0 = None
 
     # downsampling
-    print(0)
     xyz_1, points_1, _ = pointnet_downsample(xyz_0, points_0, 512, 0.2, 32, [64,64,128])
-    print(1)
     xyz_2, points_2, _ = pointnet_downsample(xyz_1, points_1, 128, 0.4, 64, [128,128,256])
-    print(2)
     xyz_3, points_3, _ = pointnet_downsample(xyz_2, points_2, 1, 1, 128, [256,512,1024])
-    print(3)
 
     # Fully connected layers
     net = tf.reshape(points_3, [batch_size, -1])
