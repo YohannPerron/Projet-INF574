@@ -43,7 +43,7 @@ def sample_and_group(npoint, radius, nsample, xyz, points, knn=False, use_xyz=Tr
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
     if knn:
         _,idx = knn_point(nsample, xyz, new_xyz)
-	else:
+    else:
         idx, pts_cnt = query_ball_point(radius, nsample, xyz, new_xyz)
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!2")
     grouped_xyz = group_point(xyz, idx) # (batch_size, npoint, nsample, 3)
