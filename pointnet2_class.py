@@ -30,7 +30,7 @@ def get_model(NUM_POINTS):
     # net= tf.keras.layers.Dense(10)(net)
 
 
-    return keras.Model(inputs=inputs, outputs=net, name="pointnet2")
+    return keras.Model(inputs=point_cloud, outputs=net, name="pointnet2")
 
 
 def get_loss(pred, label):
