@@ -10,7 +10,7 @@ class get_model(nn.Module):
 
         self.SetAbstract1 = PointNetSetAbstractionMsg(npoint=512, radius_list=[0.1, 0.2, 0.4], nsample_list=[32, 64, 128], input_size=6, NN_list=[[32, 32, 64], [64, 64, 128], [64, 96, 128]])
         self.SetAbstract2 = PointNetSetAbstractionMsg(npoint=128, radius_list=[0.4,0.8], nsample_list=[64, 128], input_size=128+128+64, NN_list=[[128, 128, 256], [128, 196, 256]])
-        self.SetAbstract3 = PointNetSetAbstraction(npoint=None, radius_list=None, nsample_list=None, input_size=512 + 3, NN_list=[256, 512, 1024], group_all=True)
+        self.SetAbstract3 = PointNetSetAbstraction(npoint=None, radius=None, nsample=None, input_size=512 + 3, NNlayers=[256, 512, 1024], group_all=True)
 
         self.FeatProp3 = PointNetFeaturePropagation(input_size=1536, NNLayers=[256, 256])
         self.FeatProp2 = PointNetFeaturePropagation(input_size=576, NNLayers=[256, 128])
