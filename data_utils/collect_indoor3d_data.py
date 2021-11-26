@@ -1,3 +1,7 @@
+#
+# Implementations form https://github.com/yanx27/Pointnet_Pointnet2_pytorch
+#
+
 import os
 import sys
 from indoor3d_util import DATA_PATH, collect_point_label
