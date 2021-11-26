@@ -1,4 +1,9 @@
 # *_*coding:utf-8 *_*
+
+#
+# Implementations form https://github.com/yanx27/Pointnet_Pointnet2_pytorch
+#
+
 import os
 import json
 import warnings

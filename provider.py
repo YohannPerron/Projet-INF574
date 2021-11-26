@@ -1,3 +1,7 @@
+#
+# Implementations form https://github.com/yanx27/Pointnet_Pointnet2_pytorch
+#
+
 import numpy as np
 
 def normalize_data(batch_data):
