@@ -103,12 +103,13 @@ class PointNetSetAbstractionMsg(nn.Module):
         for i in range(len(self.convolution_blocks)):
             radius = self.radius_list[i]
             #only need to group the point
+            K = self.nsample_list[i]
             grouping_index = query_ball_point(radius, K, xyz, centroid_coord)
             grouped_xyz = index_points(xyz, grouping_index)  #[Batch, npoint, nsample, Coord]
-            grouped_xyz -= centroid_coord.view(B, S, 1, C) #supstract centroid coords
+            grouped_xyz -= centroid_coord.view(B, self.npoint, 1, C) #supstract centroid coords
             #concatenat data (if exist) to coords
             if points is not None:
-                grouped_points = index_points(points, group_idx)
+                grouped_points = index_points(points, grouping_index)
                 grouped_points = torch.cat([grouped_points, grouped_xyz], dim=-1)
             else:
                 grouped_points = grouped_xyz
