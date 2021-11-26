@@ -119,7 +119,7 @@ def main(args):
     shutil.copy('models/pointnet2_OPS.py', str(exp_dir))
     shutil.copy('models/pointnet2_layers.py', str(exp_dir))
 
-    classifier = MODEL.get_model().cuda()
+    classifier = MODEL.get_model(num_part, normal_channel=True).cuda()
     criterion = MODEL.get_loss().cuda()
     classifier.apply(inplace_relu)
 
