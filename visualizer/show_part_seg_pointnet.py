@@ -43,7 +43,7 @@ cmap = plt.cm.get_cmap("hsv",50)
 cmap = np.array([cmap(i) for i in range(50)])[:,:3]
 gt = cmap[seg -1,:]
 
-model_name = 'pointnetplusplus_msg'
+model_name = '../models/pointnetplusplus_msg'
 MODEL = importlib.import_module(model_name)
 classifier = MODEL.get_model(50, True).cuda()
 checkpoint = torch.load('../log/part_seg/pointnet2_part_seg_msg/checkpoints/best_model.pth')
