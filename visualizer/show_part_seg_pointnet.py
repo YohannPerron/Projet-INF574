@@ -45,7 +45,7 @@ gt = cmap[seg -1,:]
 
 model_name = 'pointnetplusplus_msg'
 MODEL = importlib.import_module(model_name)
-classifier = MODEL.get_model(50, True).cuda()
+classifier = MODEL.get_model().cuda()
 checkpoint = torch.load('../log/part_seg/pointnet2_part_seg_msg/checkpoints/best_model.pth')
 classifier.load_state_dict(checkpoint['model_state_dict'])
 
