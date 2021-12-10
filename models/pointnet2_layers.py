@@ -52,7 +52,9 @@ class PointNetSetAbstraction(nn.Module):
         for i in range(len(self.NN_convolutions)):
             batch_norm = self.NN_batch_norms[i]
             convolution = self.NN_convolutions[i]
-            grouped_points =  F.relu(batch_norm(convolution(grouped_points)))
+            grouped_points = convolution(grouped_points)
+            grouped_points = batch_norm(grouped_points)
+            grouped_points = F.relu(grouped_points)
 
         grouped_points = torch.max(grouped_points, 2)[0]
         centroid_coord = centroid_coord.permute(0, 2, 1)    #[Batch, Coord, npoint]
@@ -97,7 +99,8 @@ class PointNetSetAbstractionMsg(nn.Module):
         B, N, C = xyz.shape
 
         #we need to evaluate the centroid independantly from the NN we are using
-        centroid_coord = index_points(xyz, farthest_point_sample(xyz, self.npoint)) #[Batch, npoint, Coord]
+        id_centroids = farthest_point_sample(xyz, self.npoint)
+        centroid_coord = index_points(xyz, id_centroids) #[Batch, npoint, Coord]
         new_points_list = []
 
         for i in range(len(self.convolution_blocks)):
@@ -120,7 +123,10 @@ class PointNetSetAbstractionMsg(nn.Module):
             for j in range(len(self.convolution_blocks[i])):
                 convolution = self.convolution_blocks[i][j]
                 batch_norm = self.batch_norm_blocks[i][j]
-                grouped_points =  F.relu(batch_norm(convolution(grouped_points)))
+                grouped_points = convolution(grouped_points)
+                grouped_points = batch_norm(grouped_points)
+                grouped_points = F.relu(grouped_points)
+
             new_points = torch.max(grouped_points, 2)[0]  # [Batch, newData, nsample]
             new_points_list.append(new_points)
 
@@ -185,6 +191,9 @@ class PointNetFeaturePropagation(nn.Module):
         for i in range(len(self.convolutions)):
             convolution = self.convolutions[i]
             batch_norm = self.batch_norms[i]
-            new_points = F.relu(batch_norm(convolution(new_points)))
+            new_points = convolution(new_points)
+            new_points = batch_norm(new_points)
+            new_points = F.relu(new_points)
+            
         return new_points
 
