@@ -1,36 +1,30 @@
 import os
 import glob
-import trimesh
-import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+import numpy as np
+import trimesh
 from matplotlib import pyplot as plt
 from pointnet2_class import get_model
-
 tf.random.set_seed(1234)
 
-"""
-## Load dataset
-First download the file
-P.S: change ModelNet10 to ModelNet40 to get same results as paper
-"""
+
+# Loading dataset
+#P.S: change ModelNet10 to ModelNet40 to get same results as paper
+
 
 #Downlaod file and extract zip
 DATA_DIR = tf.keras.utils.get_file("modelnet.zip","http://3dvision.princeton.edu/projects/2014/3DShapeNets/ModelNet10.zip",extract=True,)
 DATA_DIR = os.path.join(os.path.dirname(DATA_DIR), "ModelNet10")
 
 
-"""
-To generate a `tf.data.Dataset()` we need to first parse through the ModelNet data
-folders. 
-Each folder has a category divided into train and test.
-
-Each mesh is loaded and sampled into a point cloud.
-we add the pointcloud to a list and convert it to an array (np)
-We also store the current
-The folder name is the label; we store it and add it the dict
-"""
+#To generate a `tf.data.Dataset()` we need to first parse through the ModelNet data folders. 
+#Each folder has a category divided into train and test.
+#Each mesh is loaded and sampled into a point cloud.
+#we add the pointcloud to a list and convert it to an array (np)
+#We also store the current
+#The folder name is the label; we store it and add it the dict
 
 
 def parse_dataset():
@@ -69,17 +63,10 @@ def parse_dataset():
     return (TRAINPTS,TESTPTS,TRAINLABEL,TESTLABEL,CLASS_MAP,)
 
 
-
-"""
-Parse data in tf.data.Dataset()
-"""
 print("parsing data ...")
 TRAINPTS, TESTPTS, TRAINLABEL, TESTLABEL, CLASS_MAP = parse_dataset()
 
-
-"""
-shuffling and adding noise 
-"""
+#shuffling and adding noise 
 def alter(points, label):
     # adding noise
     points = points + tf.random.uniform(points.shape, -0.005, 0.005, dtype=tf.float64)
@@ -87,25 +74,19 @@ def alter(points, label):
     points = tf.random.shuffle(points)
     return points, label
 
-"""
-We shuffle the dataset as it was previously ordered by class
-And we apply noise and shuffling
-"""
+
+#We shuffle the dataset as it was previously ordered by class And we apply noise and shuffling
 print("setting up training and testing datasets...")
-train_dataset = tf.data.Dataset.from_tensor_slices((TRAINPTS, TRAINLABEL))
-test_dataset = tf.data.Dataset.from_tensor_slices((TESTPTS, TESTLABEL))
+TRAINSET = tf.data.Dataset.from_tensor_slices((TRAINPTS, TRAINLABEL))
+TESTSET = tf.data.Dataset.from_tensor_slices((TESTPTS, TESTLABEL))
 
-#use batch size of 32
-train_dataset = train_dataset.shuffle(len(TRAINPTS)).map(alter).batch(32)
-test_dataset = test_dataset.shuffle(len(TESTPTS)).batch(32)
-
-"""
-### Build a model
-Each convolution and fully-connected layer (with exception for end layers) consits of
-Convolution / Dense -> Batch Normalization -> ReLU Activation.
-"""
+#works on 32
+TRAINSET = TRAINSET.shuffle(len(TRAINPTS)).map(alter).batch(32)
+TESTSET = TESTSET.shuffle(len(TESTPTS)).batch(32)
 
 
+
+###******TNET implementation taken from Keras examples
 def conv_bn(x, filters):
     x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
     x = layers.BatchNormalization(momentum=0.0)(x)
@@ -116,16 +97,6 @@ def dense_bn(x, filters):
     x = layers.Dense(filters)(x)
     x = layers.BatchNormalization(momentum=0.0)(x)
     return layers.Activation("relu")(x)
-
-
-"""
-PointNet consists of two core components. The primary MLP network, and the transformer
-net (T-net). The T-net aims to learn an affine transformation matrix by its own mini
-network. The T-net is used twice. The first time to transform the input features (n, 3)
-into a canonical representation. The second is an affine transformation for alignment in
-feature space (n, 3). As per the original paper we constrain the transformation to be
-close to an orthogonal matrix (i.e. ||X*X^T - I|| = 0).
-"""
 
 
 class OrthogonalRegularizer(keras.regularizers.Regularizer):
@@ -140,10 +111,6 @@ class OrthogonalRegularizer(keras.regularizers.Regularizer):
         xxt = tf.reshape(xxt, (-1, self.num_features, self.num_features))
         return tf.reduce_sum(self.l2reg * tf.square(xxt - self.eye))
 
-
-"""
- We can then define a general function to build T-net layers.
-"""
 
 
 def tnet(inputs, num_features):
@@ -168,13 +135,9 @@ def tnet(inputs, num_features):
     # Apply affine transformation to input features
     return layers.Dot(axes=(2, 1))([inputs, feat_T])
 
+###******
 
-"""
-The main network can be then implemented in the same manner where the t-net mini models
-can be dropped in a layers in the graph. Here we replicate the network architecture
-published in the original paper but with half the number of weights at each layer as we
-are using the smaller 10 class ModelNet dataset.
-"""
+
 print("creating network...")
 inputs = keras.Input(shape=(2048, 3))
 print("adding tnet")
@@ -215,58 +178,29 @@ x = layers.Dropout(0.3)(x)
 
 #we have 10 classes 
 #P.S: change to 40 to get same results
-outputs = layers.Dense(10, activation="softmax")(x)
+OUTPUTS = layers.Dense(10, activation="softmax")(x)
 
-#model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
-model = get_model()
-model.summary()
+MODEL = keras.Model(inputs=inputs, outputs=OUTPUTS, name="pointnet")
 
-"""
-### Train model
-Once the model is defined it can be trained like any other standard classification model
-using `.compile()` and `.fit()`.
-"""
 print("compiling model")
-model.compile(
+MODEL.compile(
     loss="sparse_categorical_crossentropy",
     optimizer=keras.optimizers.Adam(learning_rate=0.001),
     metrics=["sparse_categorical_accuracy"],
 )
 print("fitting model")
-model.fit(train_dataset, epochs=20, validation_data=test_dataset)
+MODEL.fit(TRAINSET, epochs=20, validation_data=TESTSET)
 
-"""
-## Visualize predictions
-We can use matplotlib to visualize our trained model performance.
-"""
+#Test data
+TAKE = TESTSET.take(1)
+PTS, LBL = list(TAKE)[0]
+PTS = PTS[:8, ...]
+LBL = LBL[:8, ...]
 
-data = test_dataset.take(1)
+#Getting Predictions
+Predictions = MODEL.predict(PTS)
+Predictions = tf.math.argmax(Predictions, -1)
 
-points, labels = list(data)[0]
-points = points[:8, ...]
-labels = labels[:8, ...]
-
-# run test data through model
-preds = model.predict(points)
-preds = tf.math.argmax(preds, -1)
-
-points = points.numpy()
-
-# score the model
-score = model.evaluate(labels, preds)
-print('Test loss: ', score[0])
-print('Test accuracy: ', score[1])
-
-
-# plot points with predicted class and label
-fig = plt.figure(figsize=(15, 10))
-for i in range(8):
-    ax = fig.add_subplot(2, 4, i + 1, projection="3d")
-    ax.scatter(points[i, :, 0], points[i, :, 1], points[i, :, 2])
-    ax.set_title(
-        "pred: {:}, label: {:}".format(
-            CLASS_MAP[preds[i].numpy()], CLASS_MAP[labels.numpy()[i]]
-        )
-    )
-    ax.set_axis_off()
-plt.show()
+# Evaluate the model
+Accuracy = MODEL.evaluate(LBL, Predictions)
+print('Test accuracy: ', Accuracy[1])
